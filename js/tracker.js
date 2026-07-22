@@ -1,9 +1,12 @@
 /**
  * Thin wrapper around MediaPipe's HandLandmarker.
  *
- * Exposes a single detect(video, timestamp) call that returns the mirrored
- * index-fingertip position (normalized 0..1 coordinates) plus whether the
- * hand is in the "pointing" pose used as pen-down.
+ * detect(video, timestamp) returns the mirrored index-fingertip and palm
+ * positions (normalized 0..1) plus the recognized gesture:
+ *   - "paint": index finger extended, middle + ring curled  -> pen down
+ *   - "erase": all four fingers extended (open, spread hand) -> eraser
+ *   - "fist":  all four fingers curled                       -> pen up
+ *   - "idle":  anything else                                 -> pen up
  */
 
 // Imported dynamically in init() so a CDN outage surfaces as a catchable
@@ -16,12 +19,18 @@ const MODEL_URL =
 
 // Landmark indices (see MediaPipe hand landmark model docs).
 const WRIST = 0;
+const INDEX_MCP = 5;
 const INDEX_PIP = 6;
 const INDEX_TIP = 8;
+const MIDDLE_MCP = 9;
 const MIDDLE_PIP = 10;
 const MIDDLE_TIP = 12;
+const RING_MCP = 13;
 const RING_PIP = 14;
 const RING_TIP = 16;
+const PINKY_MCP = 17;
+const PINKY_PIP = 18;
+const PINKY_TIP = 20;
 
 function dist(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
@@ -56,24 +65,38 @@ export class HandTracker {
   }
 
   /**
-   * @returns {null | {tip: {x, y}, penDown: boolean}}
-   *   tip is normalized (0..1) and already mirrored horizontally to match
-   *   the mirrored video preview.
+   * @returns {null | {tip, palm, span, gesture}}
+   *   tip / palm are normalized (0..1) and already mirrored horizontally to
+   *   match the mirrored video preview. span is the normalized distance
+   *   between index and pinky knuckles (a proxy for on-screen hand size).
    */
   detect(video, timestampMs) {
     if (!this.landmarker) return null;
     const result = this.landmarker.detectForVideo(video, timestampMs);
-    const landmarks = result.landmarks?.[0];
-    if (!landmarks) return null;
+    const lm = result.landmarks?.[0];
+    if (!lm) return null;
 
-    const indexUp = isExtended(landmarks, INDEX_TIP, INDEX_PIP);
-    const middleUp = isExtended(landmarks, MIDDLE_TIP, MIDDLE_PIP);
-    const ringUp = isExtended(landmarks, RING_TIP, RING_PIP);
+    const indexUp = isExtended(lm, INDEX_TIP, INDEX_PIP);
+    const middleUp = isExtended(lm, MIDDLE_TIP, MIDDLE_PIP);
+    const ringUp = isExtended(lm, RING_TIP, RING_PIP);
+    const pinkyUp = isExtended(lm, PINKY_TIP, PINKY_PIP);
+
+    let gesture = "idle";
+    if (indexUp && middleUp && ringUp && pinkyUp) gesture = "erase";
+    else if (indexUp && !middleUp && !ringUp) gesture = "paint";
+    else if (!indexUp && !middleUp && !ringUp && !pinkyUp) gesture = "fist";
+
+    const palmPoints = [WRIST, INDEX_MCP, MIDDLE_MCP, RING_MCP, PINKY_MCP];
+    const palm = palmPoints.reduce(
+      (acc, i) => ({ x: acc.x + lm[i].x / palmPoints.length, y: acc.y + lm[i].y / palmPoints.length }),
+      { x: 0, y: 0 }
+    );
 
     return {
-      tip: { x: 1 - landmarks[INDEX_TIP].x, y: landmarks[INDEX_TIP].y },
-      // Pen down while "pointing": index extended, middle and ring curled.
-      penDown: indexUp && !middleUp && !ringUp,
+      tip: { x: 1 - lm[INDEX_TIP].x, y: lm[INDEX_TIP].y },
+      palm: { x: 1 - palm.x, y: palm.y },
+      span: dist(lm[INDEX_MCP], lm[PINKY_MCP]),
+      gesture,
     };
   }
 

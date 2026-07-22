@@ -17,16 +17,38 @@
         </label>
         <label class="tool">
           <span>Size</span>
-          <input type="range" id="brushSize" min="2" max="40" value="10" />
+          <input type="range" id="brushSize" min="1" max="100" value="12" />
         </label>
         <label class="tool">
           <span>Brush</span>
           <select id="brushStyle">
             <option value="solid" selected>Solid</option>
+            <option value="paint">Paint brush</option>
+            <option value="spray">Spray paint</option>
+            <option value="gooey">Gooey slime</option>
+            <option value="steam">Steam</option>
+            <option value="toothpaste">Toothpaste</option>
+            <option value="neon">Neon glow</option>
+            <option value="rainbow">Rainbow</option>
+            <option value="pixel">Pixel</option>
           </select>
+        </label>
+        <label class="tool" title="Paint drips when the finger holds still for 1 second">
+          <span>Hold drip</span>
+          <input type="range" id="holdDrip" min="0" max="100" value="50" />
+        </label>
+        <label class="tool" title="Existing paint drips at random">
+          <span>Drip</span>
+          <input type="range" id="ambientDrip" min="0" max="100" value="0" />
+        </label>
+        <label class="tool" title="Background color used when saving or recording">
+          <span>Background</span>
+          <input type="color" id="bgColor" value="#ffffff" />
         </label>
         <button id="undoBtn" class="btn" title="Undo last stroke">Undo</button>
         <button id="clearBtn" class="btn" title="Clear the canvas">Clear</button>
+        <button id="saveBtn" class="btn" title="Save the painting as a PNG">Save PNG</button>
+        <button id="recordBtn" class="btn" title="Record the painting as a movie">Record</button>
         <button id="cameraToggle" class="btn btn-primary">Start camera</button>
       </div>
     </header>
@@ -41,8 +63,10 @@
     </section>
 
     <footer class="hints">
-      <span><strong>Point</strong> (index finger up, others curled) to paint</span>
-      <span><strong>Open your hand</strong> to lift the brush</span>
+      <span><strong>Point</strong> (index finger up) to paint</span>
+      <span><strong>Hold still</strong> for 1s to let the paint drip</span>
+      <span><strong>Make a fist</strong> to pause painting</span>
+      <span><strong>Spread your hand</strong> to erase with your palm</span>
     </footer>
   </main>
 

@@ -71,7 +71,7 @@ body {
 }
 
 .tool input[type="range"] {
-  width: 90px;
+  width: 80px;
 }
 
 .tool select {
@@ -95,6 +95,17 @@ body {
 
 .btn:hover {
   background: #3a445c;
+}
+
+.btn.recording {
+  background: #e5484d;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.65;
+  }
 }
 
 .btn-primary {
