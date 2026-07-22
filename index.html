@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirPaint — paint with your finger</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="stage-wrap">
+    <header class="topbar">
+      <h1>AirPaint</h1>
+      <div class="toolbar">
+        <label class="tool">
+          <span>Color</span>
+          <input type="color" id="brushColor" value="#ff3d7f" />
+        </label>
+        <label class="tool">
+          <span>Size</span>
+          <input type="range" id="brushSize" min="2" max="40" value="10" />
+        </label>
+        <label class="tool">
+          <span>Brush</span>
+          <select id="brushStyle">
+            <option value="solid" selected>Solid</option>
+          </select>
+        </label>
+        <button id="undoBtn" class="btn" title="Undo last stroke">Undo</button>
+        <button id="clearBtn" class="btn" title="Clear the canvas">Clear</button>
+        <button id="cameraToggle" class="btn btn-primary">Start camera</button>
+      </div>
+    </header>
+
+    <section class="stage">
+      <video id="webcam" autoplay playsinline muted></video>
+      <canvas id="paintCanvas"></canvas>
+      <canvas id="overlayCanvas"></canvas>
+      <div id="statusBanner" class="status-banner">
+        <p id="statusText">Click “Start camera” and allow webcam access.</p>
+      </div>
+    </section>
+
+    <footer class="hints">
+      <span><strong>Point</strong> (index finger up, others curled) to paint</span>
+      <span><strong>Open your hand</strong> to lift the brush</span>
+    </footer>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
